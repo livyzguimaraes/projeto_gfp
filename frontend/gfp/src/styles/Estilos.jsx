@@ -12,4 +12,6 @@ const Estilos = {
     },
 }
 
+
+
 export default Estilos;

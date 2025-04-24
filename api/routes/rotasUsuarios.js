@@ -83,45 +83,48 @@ class rotasUsuarios{
             }
             if(senha!== undefined){
                 campos.push(`senha = $${valores.length + 1}`)
-                valores.push(senha)
+                const saltRounds = 10;
+                const senhaCriptografada = await bcrypt.hash(senha, saltRounds);
+                valores.push(senhaCriptografada)
             }
             if(tipo_acesso!== undefined){
                 campos.push(`tipo_acesso = $${valores.length + 1}`)
                 valores.push(tipo_acesso)
             }
             if (campos.length === 0){
-                return res.status(400).json({erro: "Informe os campos a serem atualizados"})
+                return res.status(400).json({mensagem: "Nenhum campo fornecido"})
             }
            
             // Montar a query
             const query = `UPDATE usuarios SET ${campos.join(',')}
-            WHERE id_usuario = ${id} returning *`
+            WHERE id_usuario = ${id} RETURNING *`
            
             // Executar a query
             const usuario = await BD.query(query, valores)
 
             // Verifica se o usuario foi atualizado
             if(usuario.rows.length === 0){
-                return res.status(404).json({erro: "Usuário não encontrado"})
+                return res.status(404).json({message: "Usuário não encontrado"})
             }
             return res.status(200).json(usuario.rows[0])
         } catch(error){
-            return res.status(500).json({error: "Erro ao atualizar dados do usuário", error: error.message});
+            return res.status(500).json({message: "Erro ao atualizar dados do usuário", error: error.message});
         }
     }
     static async Login(req,res){
         const { email, senha } = req.body;
         try {
-            const usuario = await BD.query(`SELECT * FROM usuarios WHERE email = $1`, [email]);
-            if (usuario.rows.length === 0) {
+            
+            const resultado = await BD.query(`SELECT * FROM usuarios WHERE email = $1 and ativo = true`, [email]);
+            if (resultado.rows.length === 0) {
                 return res.status(401).json({ error: "Usuário não encontrado" });
             }
-            const usuarioEncontrado = usuario.rows[0];
-            const senhaCorreta = await bcrypt.compare(senha, usuarioEncontrado.senha);
+            const usuario = resultado.rows[0];
+            const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
             if (!senhaCorreta) {
                 return res.status(401).json({ error: "Senha incorreta" });
             }
-
+            
             //gerar um token JWT para o usuário
             const token = jwt.sign(
                 //payload
@@ -130,13 +133,18 @@ class rotasUsuarios{
                 SECRET_KEY,
                 {expiresIn: '1h'}
             )
-
-            return res.status(200).json({message: 'Login executado com sucesso', token});
-            // return res.status(200).json({ message: "Login bem-sucedido" })
+            console.log(token);
+            
+            return res.status(200).json({token,
+                 id_usuario: usuario.id_usuario,
+                 nome: usuario.nome,
+                 email: usuario.email,
+                 tipo_acesso: usuario.tipo_acesso});
+            //return res.status(201).json({ message: "Login bem-sucedido" })
 
         } catch (error) {
             console.error("Erro ao fazer login:", error);
-            res.status(500).json({ error: "Erro ao fazer login" });
+            res.status(500).json({ mensagem: "Erro ao logar", error: error.mensagem });
         }
     }
 }
@@ -145,10 +153,9 @@ class rotasUsuarios{
 export function autenticarToken(req, res, next){
     // Extrair do token o cabeçalho da requisição
     // const token = req.headers.authorization?.replace('Bearer ', '')
-    const token = req.headers['Authorization']
-
+    const token = req.headers['authorization']
     // Verificar se o token foi fornecido
-    if(!token) return res.status(401).json({error: "Token não fornecido"})
+    if(!token) return res.status(401).json({errorsssss: "Token não fornecido ahaha"})
 
     // Verificar a validade do token
     // jwt.verify que verifica se o token é legitimo

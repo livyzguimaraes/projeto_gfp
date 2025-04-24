@@ -5,12 +5,11 @@ const { Pool } = pkg;
 dotenv.config()
 
 // const BD = new Pool({
-//     connectionString: "postgres://postgres.gcwvnucynrrnmtzjkntb:NGzLr6p6Rz4z0JHT@aws-0-sa-east-1.pooler.supabase.com:5432/postgres",
-//     sal: {
+//     connectionString: "postgres://postgres.sguugivenyucuyfaegcl:uJ41uOtbuqQJXzV2@aws-0-sa-east-1.pooler.supabase.com:5432/postgres",
+//     ssl:{
 //         rejectUnauthorized: false
 //     }
 // })
-
 const BD = new Pool({
     user: 'postgres',
     host: 'localhost',

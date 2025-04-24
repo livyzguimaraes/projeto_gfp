@@ -1,7 +1,7 @@
 import express from 'express';
 import { testarConexao } from './db.js';
 import cors from 'cors';
-import rotasUsuarios from './routes/rotasUsuarios.js';
+import rotasUsuarios, {autenticarToken} from './routes/rotasUsuarios.js';
 import rotasCategorias from './routes/rotasCategorias.js';
 import rotasSubcategorias from './routes/rotasSubcategorias.js';
 import rotasLocalTransacoes from './routes/rotasLocalTransacoes.js';
@@ -18,12 +18,12 @@ app.get('/', (req, res) => {
 
 // Rotas usuarios
 app.post('/usuarios', rotasUsuarios.Novousuario)
-app.get('/usuarios',rotasUsuarios.Listar)
+app.get('/usuarios', autenticarToken, rotasUsuarios.Listar)
 app.get('/usuarios/:id', rotasUsuarios.ListarporID)
 app.put('/usuarios/:id', rotasUsuarios.AtualizartodosCampos)
 app.delete('/usuarios/:id',  rotasUsuarios.Deletar)
 app.patch('/usuarios/:id', rotasUsuarios.Atualizar)
-app.post('/login', rotasUsuarios.Login)
+app.post('/usuarios/login', rotasUsuarios.Login)
 
 
 // Rotas categorias
