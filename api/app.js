@@ -5,6 +5,7 @@ import rotasUsuarios, {autenticarToken} from './routes/rotasUsuarios.js';
 import rotasCategorias from './routes/rotasCategorias.js';
 import rotasSubcategorias from './routes/rotasSubcategorias.js';
 import rotasLocalTransacoes from './routes/rotasLocalTransacoes.js';
+import rotasTransacoes from './routes/rotasTransacoes.js';
 
 const app = express();
 testarConexao();
@@ -21,13 +22,13 @@ app.post('/usuarios', rotasUsuarios.Novousuario)
 app.get('/usuarios', autenticarToken, rotasUsuarios.Listar)
 app.get('/usuarios/:id', rotasUsuarios.ListarporID)
 app.put('/usuarios/:id', rotasUsuarios.AtualizartodosCampos)
-app.delete('/usuarios/:id',  rotasUsuarios.Deletar)
-app.patch('/usuarios/:id', rotasUsuarios.Atualizar)
+app.delete('/usuarios/:id_usuario', autenticarToken,  rotasUsuarios.Deletar)
+app.patch('/usuarios/:id_usuario', rotasUsuarios.Atualizar)
 app.post('/usuarios/login', rotasUsuarios.Login)
 
 
 // Rotas categorias
-app.post('/categorias', rotasCategorias.novaCategoria)
+app.post('/categorias', autenticarToken, rotasCategorias.novaCategoria)
 app.get('/categorias', rotasCategorias.listarTodas)
 app.delete('/categorias/:id', rotasCategorias.Deletar)
 app.put('/categorias/:id', rotasCategorias.atualizarTodosCampos)
@@ -51,12 +52,12 @@ app.put('/localTransacao/:id_localTransacao', rotasLocalTransacoes.atualizarTodo
 app.delete('/localTransacao/:id_localTransacao', rotasLocalTransacoes.deletar);
 
 // // Rotas Transacoes
-// app.post('/transacao', rotasTransacoes.nova);
-// app.get('/transacao', rotasTransacoes.listar);
-// app.get('/transacao/:id_transacao', rotasTransacoes.listarPorId);
-// app.patch('/transacao/:id_transacao', rotasTransacoes.atualizar);
-// app.put('/transacao/:id_transacao', rotasTransacoes.atualizarTodos);
-// app.delete('/transacao/:id_transacao', rotasTransacoes.deletar);
+app.post('/transacao', rotasTransacoes.criarTransacao);
+app.get('/transacao', rotasTransacoes.listarTransacoes);
+app.get('/transacao/:id_transacao', rotasTransacoes.listarporId);
+app.patch('/transacao/:id_transacao', rotasTransacoes.AtualizarTransacao);
+app.put('/transacao/:id_transacao', rotasTransacoes.atualizarTodosCampos);
+app.delete('/transacao/:id_transacao', rotasTransacoes.deletarTransacao);
 
 
 const porta = 3000;

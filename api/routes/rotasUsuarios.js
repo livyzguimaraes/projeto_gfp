@@ -54,15 +54,14 @@ class rotasUsuarios{
         }
     }
     static async Deletar(req, res){
-        const { id } = req.params;
+        const { id_usuario } = req.params;
         try {
-            const query = `UPDATE usuarios SET ativo = false WHERE id_usuario = $1`;
-            const valores = [id];
-            // Executar a query
-            const usuario = await BD.query(query, valores)
-            return res.status(200).json(usuario.rows[0])
+            const usuario = await BD.query(
+                `UPDATE usuarios SET ativo = false WHERE id_usuario = $1`, [id_usuario]);
+            return res.status(200).json({message: "Usuário desativado com sucesso"});
         } catch(error){
-            return res.status(500).json({error: "Erro ao atualizar dados do usuário", error: error.message});
+            return res.status(500).json({message:
+                 "Erro ao desativar usuário", error: error.message});
         }
     }
     static async Atualizar(req, res){
@@ -127,11 +126,9 @@ class rotasUsuarios{
             
             //gerar um token JWT para o usuário
             const token = jwt.sign(
-                //payload
                 {id: usuario.id_usuario, nome: usuario.nome, email: usuario.email},
-                //signature
                 SECRET_KEY,
-                {expiresIn: '1h'}
+                // {expiresIn: '1h'}
             )
             console.log(token);
             

@@ -18,6 +18,32 @@ class rotasCategorias {
             return res.status(500).json({ error: "Erro ao criar Categoria", message: error.message });
         }
     }
+
+    //filtrar por tipo de categoria
+    static async filtrarCategoria(req, res) {
+        // o valor sera enviado por parametro na url, deve ser enviado dessa maneira
+        // ?tipo_transacao=entrada
+        const { tipo_transacao } = req.query;
+
+        try {
+            const filtros = []
+            const valores = []
+
+            if (tipo_transacao) {
+                filtros.push(`tipo_transacao = $${valores.length + 1}`)
+                valores.push(tipo_transacao)
+            }
+            const query = `
+            SELECT * FROM categorias
+            ${filtros.length ? `WHERE ${filtros.join(" AND ")}` : ""} and ativo = true
+            ORDER BY id_categoria DESC
+            `
+            const resultado = await BD.query(query, valores)
+        }catch (error) {
+
+        }
+    }
+
     static async listarTodas(req, res){
         try {
             const categorias = await BD.query(`select c.nome, c.tipo_transacao, c.gasto_fixo, c.ativo, u.nome as nome_usuario from
