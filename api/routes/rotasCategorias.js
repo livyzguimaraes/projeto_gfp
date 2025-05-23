@@ -137,6 +137,25 @@ static async Atualizar(req, res){
             return res.status(500).json({ error: "Erro ao listar categoria", error: error.message });
         }
 }
+
+    static async filtrarCategoria (req, res){
+        const { tipo_transacao } = req.query;
+
+        try {
+            const query = `
+                SELECT * FROM categorias
+                WHERE tipo_transacao = $1 AND ativo = true
+                ORDER BY nome DESC
+            `
+            const valores = [tipo_transacao]
+
+            const resposta = await BD.query(query, valores)
+
+            return res.status(200).json(resposta.rows)
+        }catch (error) {
+
+        }
+    }
 }
 
 export default rotasCategorias;

@@ -1,147 +1,159 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { enderecoServidor } from "../utils";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+// Import icons (using react-icons as an example)
+// You might need to install it: npm install react-icons
+import { MdEmail, MdLock, MdVisibility, MdVisibilityOff, MdBarChart, MdNotifications } from 'react-icons/md';
 
-export default function Login() {
-    const navigate = useNavigate();
+function Login() {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [lembrar, setLembrar] = useState(false);
 
-    const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
-    const [mensagem, setMensagem] = useState("");
+  useEffect(() => {
+    const buscarUsuarioLogado = async () => {
+        const usuarioLogado = await localStorage.getItem('UsuarioLogado');
+        if (usuarioLogado) {
+            setUsuario( JSON.parse(usuarioLogado));
+            if (usuario.lembrar == true) {
+                navigate('/principal');
+              }
+          }
+      }
+    buscarUsuarioLogado()
+  }, []);
 
-    async function botaoEntrar(e) {
-        e.preventDefault();
-
-        try {
-            if (email === "" || senha === "") {
-                throw new Error("Preencha todos os campos!");
-            }
-            const resposta = await fetch(`${enderecoServidor}/usuarios/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    email: email, 
-                    senha: senha 
-                }),
-            });
-            if (!resposta.ok) {
-                const dados = await resposta.json();
-                localStorage.setItem("UsuarioLogado", JSON.stringify(dados));
-                setMensagem("Login bem-sucedido!");
-                navigate("/principal");
-            } else {
-                setMensagem("Email ou senha incorretos!");
-                throw new Error("Email ou senha incorretos!");
-            }
-        } catch (error) {
-            console.error("Erro ao fazer login:", error);
-            alert(error.message);
-        }
-    }
-
-    function botaoLimpar() {
-        setEmail("");
-        setSenha("");
-        setMensagem("");
-    }
-
-    const estilos = {
-        container: {
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100vh",
-            backgroundColor: "#2C3E50", // Fundo principal
-            color: "#FFFFFF", // Cor do texto
-            fontFamily: "Arial, sans-serif",
-        },
-        box: {
-            backgroundColor: "#34495E", // Fundo secundário
-            padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            width: "300px",
-            textAlign: "center",
-        },
-        logo: {
-            width: "150px",
-            marginBottom: "20px",
-        },
-        inputGroup: {
-            marginBottom: "15px",
-            textAlign: "left",
-        },
-        input: {
-            width: "100%",
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            fontSize: "14px",
-        },
-        button: {
-            width: "100%",
-            padding: "10px",
-            marginTop: "10px",
-            backgroundColor: "#0056B3  ", // Cor principal
-            color: "#FFFFFF", // Cor do texto do botão
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "16px",
-        },
-        buttonHover: {
-            backgroundColor: "#0056B3 ", // Cor secundária
-        },
-        mensagem: {
-            marginTop: "15px",
-            color: "red",
-            fontSize: "14px",
-        },
-    };
-
-    return (
-        <div style={estilos.container}>
-            <h1>Tela de Login</h1>
-            <div style={estilos.box}>
-                <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/SENAI_S%C3%A3o_Paulo_logo.png/1024px-SENAI_S%C3%A3o_Paulo_logo.png"
-                    alt="Logo SENAI"
-                    style={estilos.logo}
-                />
-                <h2>Login</h2>
-                <div>
-                    <div style={estilos.inputGroup}>
-                        <label>Email</label>
-                        <input
-                            onChange={(e) => setEmail(e.target.value)}
-                            value={email}
-                            type="email"
-                            placeholder="Digite seu email"
-                            required
-                            style={estilos.input}
-                        />
-                    </div>
-                    <div style={estilos.inputGroup}>
-                        <label>Senha</label>
-                        <input
-                            onChange={(e) => setSenha(e.target.value)}
-                            value={senha}
-                            type="password"
-                            placeholder="Digite sua senha"
-                            required
-                            style={estilos.input}
-                        />
-                    </div>
-                    <button onClick={botaoEntrar} style={estilos.button}>
-                        Entrar
-                    </button>
-                    <button onClick={botaoLimpar} style={estilos.button}>
-                        Limpar
-                    </button>
-                </div>
-                <p style={estilos.mensagem}>{mensagem}</p>
-            </div>
-        </div>
-    );
+  const botaoLogout =  () => {
+    try {
+      localStorage.removeItem('UsuarioLogado');
+      navigate('/');
+    }catch (error) {
+      console.error('Erro ao deslogar:', error);
+  }
 }
+
+
+ 
+
+  const botaoLogin = async (e) => {
+    e.preventDefault();
+    try {
+      if (email === '' || senha === '') {
+        throw new Error('Preencha todos os campos');
+      }
+      //autenticando utilizando a API de backend com o fetch e recebendo o token
+      const resposta = await fetch(`${enderecoServidor}/usuarios/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          senha: senha,
+        }),
+      });
+
+      const dados = await resposta.json();
+      if (resposta.ok) {
+        // Aqui você pode armazenar o token em um estado global ou AsyncStorage, se necessário
+        localStorage.setItem('UsuarioLogado', JSON.stringify(...dados, lembrar));
+        navigate("/principal")
+      } else {
+        throw new Error(dados.message || 'Erro ao fazer login');
+      }
+    } catch (error) {
+      console.error('Erro ao realizar login:', error);
+      alert(error.message);
+      return;
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        {/* Using MdTrendingUp as a placeholder for the logo */}
+
+        <img src={logo} alt="Logo" className={styles.logoIcon} style={{ width: '50px', height: '50px' }} />
+        <div>
+          <h1 className={styles.appName}>GFP</h1>
+          <p className={styles.appSubtitle}>Gestor Financeiro Pessoal</p>
+        </div>
+      </header>
+
+      <main className={styles.mainContent}>
+        <div className={styles.loginForm}>
+          <h2 className={styles.title}>Acesse sua conta</h2>
+
+          <div className={styles.inputGroup}>
+            <MdEmail className={styles.inputIcon} />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={styles.input}
+              aria-label="Email"
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <MdLock className={styles.inputIcon} />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className={styles.input}
+              aria-label="Senha"
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className={styles.visibilityToggle}
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            >
+
+              
+              {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+            </button>
+          </div>
+
+          <div className={styles.between}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <input type="checkbox" style={{ marginRight: '5px' }}
+                checked={lembrar} onChange={(e) => setLembrar(e.target.checked)} />
+              <label> Lembrar-me</label>
+            </div>
+            <a href="#" className={styles.forgotPassword}>Esqueceu a senha?</a>
+
+          </div>
+
+          <button type="submit" className={styles.submitButton} onClick={botaoLogin}>
+            Entrar
+          </button>
+
+          <p className={styles.signupText}>
+            Não tem uma conta? <a href="#" className={styles.signupLink}>Cadastre-se</a>
+          </p>
+        </div>
+
+        <div className={styles.infoBoxes}>
+          <div className={styles.infoBox}>
+            <MdBarChart className={styles.infoIcon} />
+            <span>Acompanhe seus gastos com gráficos</span>
+          </div>
+          <div className={styles.infoBox}>
+            <MdNotifications className={styles.infoIcon} />
+            <span>Receba alertas financeiros importantes</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default Login;
